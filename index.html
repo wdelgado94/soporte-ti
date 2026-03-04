@@ -76,7 +76,7 @@ document.getElementById('form').addEventListener('submit', function(e) {
     firma: signaturePad.toDataURL()
   };
 
-  fetch("https://script.google.com/macros/s/AKfycbwDNZnHC1vPKxyCDRBAckPi_B2dDnCRytKw6zzWg3SMDC5xirc-S0AROEuvJK1pSScm/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbwjjOMKbyMdINb7wxCEhLdLmCf5qljrkzsxb7qQGAkrzwpprPFkyzxDMsG65I_zKuTH/exec", {
     method: "POST",
     body: JSON.stringify(data)
   })
