@@ -1,94 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Registro Soporte TI</title>
-<style>
-body { font-family: Arial; max-width: 600px; margin: auto; }
-input, textarea, select { width: 100%; padding: 8px; margin: 5px 0; }
-canvas { border: 1px solid #000; }
-button { padding: 10px; margin-top: 10px; width: 100%; }
-</style>
+  <meta charset="UTF-8">
+  <title>Registro Soporte TI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+
+    canvas {
+      border: 1px solid #000;
+      width: 100%;
+      max-width: 500px;
+      height: 200px;
+      display: block;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Registro de Servicio TI</h2>
+  <h2>Registro de Servicio TI</h2>
 
-<form id="form">
+  <form id="form">
+    <input type="text" id="nombre" placeholder="Nombre Cliente" required>
+    <input type="text" id="empresa" placeholder="Empresa" required>
+    <input type="text" id="documento" placeholder="Documento" required>
 
-<input type="text" id="nombre" placeholder="Nombre Cliente" required>
-<input type="text" id="empresa" placeholder="Empresa" required>
-<input type="text" id="documento" placeholder="Documento" required>
+    <select id="tipo" required>
+      <option value="">Tipo de Servicio</option>
+      <option value="Soporte Remoto">Soporte Remoto</option>
+      <option value="Mantenimiento">Mantenimiento</option>
+      <option value="Instalacion">Instalacion</option>
+      <option value="Redes">Redes</option>
+      <option value="Otro">Otro</option>
+    </select>
 
-<select id="tipo" required>
-<option value="">Tipo de Servicio</option>
-<option>Soporte Remoto</option>
-<option>Mantenimiento</option>
-<option>Instalacion</option>
-<option>Redes</option>
-<option>Otro</option>
-</select>
+    <textarea id="descripcion" placeholder="Descripcion del servicio" required></textarea>
 
-<textarea id="descripcion" placeholder="Descripcion del servicio" required></textarea>
+    <select id="satisfaccion" required>
+      <option value="">Nivel de Satisfaccion</option>
+      <option value="1 - Malo">1 - Malo</option>
+      <option value="2 - Regular">2 - Regular</option>
+      <option value="3 - Bueno">3 - Bueno</option>
+      <option value="4 - Muy Bueno">4 - Muy Bueno</option>
+      <option value="5 - Excelente">5 - Excelente</option>
+    </select>
 
-<select id="satisfaccion" required>
-<option value="">Nivel de Satisfaccion</option>
-<option>1 - Malo</option>
-<option>2 - Regular</option>
-<option>3 - Bueno</option>
-<option>4 - Muy Bueno</option>
-<option>5 - Excelente</option>
-</select>
+    <p><b>Firma del Cliente:</b></p>
+    <canvas id="signature"></canvas>
 
-<p><b>Firma del Cliente:</b></p>
-<canvas id="signature" width="500" height="200"></canvas>
-<button type="button" onclick="clearCanvas()">Limpiar Firma</button>
+    <button type="button" onclick="clearCanvas()">Limpiar Firma</button>
+    <button type="submit" id="submitBtn">Enviar Registro</button>
+  </form>
 
-<button type="submit">Enviar Registro</button>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
-</form>
+  <script>
+    const canvas = document.getElementById('signature');
+    const form = document.getElementById('form');
+    const submitBtn = document.getElementById('submitBtn');
 
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      signaturePad.clear();
+    }
 
-<script>
-const canvas = document.getElementById('signature');
-const signaturePad = new SignaturePad(canvas);
+    const signaturePad = new SignaturePad(canvas);
 
-function clearCanvas() {
-  signaturePad.clear();
-}
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
-document.getElementById('form').addEventListener('submit', function(e) {
-  e.preventDefault();
+    function clearCanvas() {
+      signaturePad.clear();
+    }
 
-  if (signaturePad.isEmpty()) {
-    alert("Debe firmar antes de enviar.");
-    return;
-  }
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
 
-  const data = {
-    nombre: document.getElementById('nombre').value,
-    empresa: document.getElementById('empresa').value,
-    documento: document.getElementById('documento').value,
-    tipo: document.getElementById('tipo').value,
-    descripcion: document.getElementById('descripcion').value,
-    satisfaccion: document.getElementById('satisfaccion').value,
-    firma: signaturePad.toDataURL()
-  };
+      if (signaturePad.isEmpty()) {
+        alert("Debe firmar antes de enviar.");
+        return;
+      }
 
-  fetch("https://script.google.com/macros/s/AKfycbxtNyoKLpYGUYbQdjgJeI_qHmjsEebXa0Im0D-z_eRr8pSRELuGwqOnorgBpYtiW8ot/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-  .then(res => res.text())
-  .then(response => {
-    alert("Registro enviado correctamente");
-    document.getElementById('form').reset();
-    signaturePad.clear();
-  })
-  .catch(error => alert("Error al enviar"));
-});
-</script>
+      const data = {
+        nombre: document.getElementById('nombre').value.trim(),
+        empresa: document.getElementById('empresa').value.trim(),
+        documento: document.getElementById('documento').value.trim(),
+        tipo: document.getElementById('tipo').value,
+        descripcion: document.getElementById('descripcion').value.trim(),
+        satisfaccion: document.getElementById('satisfaccion').value,
+        firma: signaturePad.toDataURL("image/png")
+      };
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enviando...";
+
+        const res = await fetch("https://script.google.com/macros/s/AKfycbxvgGY_WlpQo61jOqBzO6TlqE7A9nZl7otD63JKEZJJaqyTGGtz2C9LikwKthvo3daV/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+          throw new Error("Error en la respuesta del servidor");
+        }
+
+        const response = await res.json();
+
+        if (response.result === "success") {
+          alert(response.message || "Registro enviado correctamente");
+          form.reset();
+          signaturePad.clear();
+        } else {
+          throw new Error(response.message || "Error desconocido");
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert("Error al enviar: " + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Enviar Registro";
+      }
+    });
+  </script>
 
 </body>
 </html>
